@@ -4,12 +4,13 @@ import { ethers } from 'ethers';
 
 import './App.css';
 
-import contract from "./contracts/learn_event.json"
+import basicContract from "./contracts/basic.json"
+import marketContract from "./contracts/market.json"
 
-const contractAddress = "0x2eec478d5bC75Ad49E43Bdf5C9715fDdacf8eb53";
-const abi = contract.abi;
-
-
+const marketContractAddress = "0x2eec478d5bC75Ad49E43Bdf5C9715fDdacf8eb53";
+const basicContractAddress = "0x9bb57b37d3e3FDCd853EE2b98fBf171e4C6a05Ad"
+const basicAbi = basicContract.abi;
+const marketAbi = marketContract.abi
 
 function App() {
   const [currentAccount, setCurrentAccount] = useState(null);
@@ -56,20 +57,47 @@ function App() {
       if (ethereum) {
         const provider = new ethers.providers.Web3Provider(ethereum);
         const signer = provider.getSigner();
-        const nftContract = new ethers.Contract(contractAddress, abi, signer);
-        let txn = await nftContract.deposit(1);
-        console.log("listing the item, please wait...");
-        await txn.wait();
-        
-        console.log(`ok your listing is added now, you can view the transaction on etherscan:https://rinkeby.etherscan.io/tx/${txn.hash}`);
+        const contract = new ethers.Contract(basicContractAddress, basicAbi, signer);
+        console.log("initialize your payment...")
+
+        let txn = await contract.mintNft();
+
+        // console.log(`your nft's token id is ${tokenId}`)
+        console.log("minting the NFT, please wait...");
+
+        // await txn.wait(1);
+
+        const receipt = await txn.wait(1)
+        const tokenId = receipt.events[0].args.tokenId;
+        console.log(tokenId)
+
+        console.log(`okay, mint completed, you can view the transaction on etherscan:https://rinkeby.etherscan.io/tx/${txn.hash}`);
       } else {
-        console.log("ethereum object doesn't exist")
+        console.log("ethereum object doesn't exist");
+      }
+    } catch (err) {
+      console.log(err);
+    }
+   }
+  
+  const listNftHandler = async () => {
+    try {
+      const { ethereum } = window;
+
+      if (ethereum) {
+        const provider = new ethers.providers.Web3Provider(ethereum);
+        const signer = provider.getSigner();
+        const contract = new ethers.Contract(marketContractAddress,marketAbi,signer)
+        console.log("initialize nft market place...")
+        let txn = await contract.mintNft();
+
+      } else {
+        console.log("ethereum object does not exist...")
       }
     } catch (err) {
       console.log(err)
     }
-   }
-
+  }
   const connectWalletButton = () => {
     return (
       <button onClick={connectWalletHandler} className='cta-button connect-wallet-button'>
@@ -85,6 +113,15 @@ function App() {
       </button>
     )
   }
+
+  const listNFTButton = () => {
+    return (
+      <button onClick={listNftHandler} className='cta-button list-nft-button'>
+        List NFT
+      </button>
+    )
+  }
+  
   useEffect(() => {
     checkWalletIsConnected();
   }, [])
