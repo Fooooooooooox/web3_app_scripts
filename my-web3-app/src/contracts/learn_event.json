@@ -1,5 +1,4 @@
-
-var abi = [
+{"abi": [
     {
         "anonymous": false,
         "inputs": [
@@ -38,22 +37,4 @@ var abi = [
         "stateMutability": "payable",
         "type": "function"
     }
-]
-var ClientReceipt = web3.eth.contract(abi);
-var clientReceiptContract = ClientReceipt.at("0x5B38Da6a701c568545dCfcB03FcB875f56beddC4" /* address */);
-
-// get deposite event
-var event = clientReceiptContract.Deposit(function(error, result) {
-    console.log("hhhhh",event)
-   if (!error)console.log(result);
-});
-
-var MyContract = web3.eth.contract(abi);
-var contractInstance = MyContract.at("0x5B38Da6a701c568545dCfcB03FcB875f56beddC4");
-// ReceiptContract = MyContract.at("0x5B38Da6a701c568545dCfcB03FcB875f56beddC4");
-
-// get deposite event
-var event = contractInstance.Deposit(function(error, result) {
-  console.log("hhhhh",event)
- if (!error)console.log(result);
-});
+]}
