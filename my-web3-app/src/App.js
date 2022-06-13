@@ -4,13 +4,13 @@ import { ethers } from 'ethers';
 
 import './App.css';
 
-import basicContract from "./contracts/basic.json"
-import marketContract from "./contracts/market.json"
+import basicContractInfo from "./contracts/basic.json"
+import marketContractInfo from "./contracts/market.json"
 
 const marketContractAddress = "0x2eec478d5bC75Ad49E43Bdf5C9715fDdacf8eb53";
 const basicContractAddress = "0x9bb57b37d3e3FDCd853EE2b98fBf171e4C6a05Ad"
-const basicAbi = basicContract.abi;
-const marketAbi = marketContract.abi
+const basicAbi = basicContractInfo.abi;
+const marketAbi = marketContractInfo.abi
 
 function App() {
   const [currentAccount, setCurrentAccount] = useState(null);
@@ -69,9 +69,11 @@ function App() {
 
         const receipt = await txn.wait(1)
         const tokenId = receipt.events[0].args.tokenId;
-        console.log(tokenId)
 
-        console.log(`okay, mint completed, you can view the transaction on etherscan:https://rinkeby.etherscan.io/tx/${txn.hash}`);
+        console.log(`success minted! your nft tokenID is: ${tokenId}`)
+
+        console.log(`you can view the transaction on etherscan:https://rinkeby.etherscan.io/tx/${txn.hash}`);
+        
       } else {
         console.log("ethereum object doesn't exist");
       }
@@ -86,11 +88,26 @@ function App() {
 
       if (ethereum) {
         const provider = new ethers.providers.Web3Provider(ethereum);
+        console.log(currentAccount)
         const signer = provider.getSigner();
-        const contract = new ethers.Contract(marketContractAddress,marketAbi,signer)
-        console.log("initialize nft market place...")
-        let txn = await contract.mintNft();
+        
+        const marketContract = new ethers.Contract(marketContractAddress,marketAbi,signer)
+        const basicContract = new ethers.Contract(basicContractAddress,basicAbi,signer)
+        
+        const tokenId = "0x09"
+        const price = ethers.utils.parseEther("0.001")
 
+        const approvalTxn = await basicContract.connect(currentAccount).approve(marketContract.address, tokenId)
+        await approvalTxn.wait(1)
+
+        console.log("listing your nft...")
+
+        const tx = await marketContract.connect(currentAccount).listItem(basicContractAddress,tokenId,price)
+        await tx.wait(1)
+        console.log("NFT Listed with token ID: ", tokenId.toString())
+
+        const mintedBy = await basicContract.ownerOf(tokenId)
+        console.log(`NFT with ID ${tokenId} minted and listed by owner ${mintedBy}}.`)
       } else {
         console.log("ethereum object does not exist...")
       }
@@ -132,6 +149,10 @@ function App() {
       <div>
         {/* {connectWalletButton()} */}
         {currentAccount ? mintNftButton() : connectWalletButton()}
+      </div>
+      <h1>nft market place</h1>
+      <div>
+        {listNFTButton()}
       </div>
     </div>
   )
