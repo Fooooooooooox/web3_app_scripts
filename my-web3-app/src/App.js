@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useState } from 'react';
 import { ethers } from 'ethers';
+import { Input } from 'antd'; 
 
 import './App.css';
 
@@ -14,6 +15,21 @@ const marketAbi = marketContractInfo.abi
 
 function App() {
   const [currentAccount, setCurrentAccount] = useState(null);
+  const [address, setAddress] = useState(null);
+  const [tokenId, setTokenId] = useState(null);
+  const [price, setPrice] = useState(null);
+  const inputAddress = (value) => {
+    setAddress(value.target.value);
+    console.log(address);
+  }
+  const inputTokenId = (value) => {
+    setTokenId(value.target.value);
+    console.log(tokenId);
+  }
+  const inputPrice = (value) => {
+    setPrice(value.target.value);
+    console.log(price);
+  }
   const checkWalletIsConnected = async () => {
     const { ethereum } = window;
     if (!ethereum) {
@@ -95,8 +111,8 @@ function App() {
         const marketContract = new ethers.Contract(marketContractAddress,marketAbi,signer)
         const basicContract = new ethers.Contract(basicContractAddress,basicAbi,signer)
         
-        const tokenId = "0x0d"
-        const price = ethers.utils.parseEther("0.001")
+        // const tokenId = "0x0d"
+        // const price = ethers.utils.parseWei("0.001")
 
         // approvalTxn here is important
         // we ask users to give approval on marketplace to take control of this token id
@@ -115,6 +131,31 @@ function App() {
 
         const mintedBy = await basicContract.ownerOf(tokenId)
         console.log(`NFT with ID ${tokenId} minted and listed by owner ${mintedBy}}.`)
+      } else {
+        console.log("ethereum object does not exist...")
+      }
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  const cancelNftHandler = async () => {
+    try {
+      const { ethereum } = window;
+
+      if (ethereum) {
+        const provider = new ethers.providers.Web3Provider(ethereum);
+        console.log(currentAccount)
+        const signer = provider.getSigner();
+
+        const marketContract = await ethers.Contract(marketContractAddress,marketAbi,signer)
+
+        console.log("cancling your nft...")
+
+        const tx = await marketContract.cancelListing(basicContractAddress, tokenId)
+        await tx.wait(1)
+        console.log("this nft listing is canceld  ", tokenId.toString())
+
       } else {
         console.log("ethereum object does not exist...")
       }
@@ -146,6 +187,14 @@ function App() {
     )
   }
   
+  const cancelNFTButton = () => {
+    return (
+      <button onClick={cancelNftHandler} className='cta-button cancel-nft-button'>
+        cancel NFT List
+      </button>
+    )
+  }
+  
   useEffect(() => {
     checkWalletIsConnected();
   }, [])
@@ -159,7 +208,17 @@ function App() {
       </div>
       <h1>nft market place</h1>
       <div>
+        <Input onPressEnter={ (value) => inputAddress(value) } type={ Number } />
+        <Input onPressEnter={ (value) => inputTokenId(value) } type ={ Number }/>
+        <Input onPressEnter={ (value) => inputPrice(value) } type ={ Number }/>
+      </div>
+      <h1></h1>
+      <div>
         {listNFTButton()}
+      </div>
+      <h1></h1>
+      <div>
+        {cancelNFTButton()}
       </div>
     </div>
   )
