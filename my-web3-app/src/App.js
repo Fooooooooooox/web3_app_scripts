@@ -7,7 +7,7 @@ import './App.css';
 import basicContractInfo from "./contracts/basic.json"
 import marketContractInfo from "./contracts/market.json"
 
-const marketContractAddress = "0x2eec478d5bC75Ad49E43Bdf5C9715fDdacf8eb53";
+const marketContractAddress = "0x427A1B98971941F7AeC2405f02bF1F819A8e3F82";
 const basicContractAddress = "0x9bb57b37d3e3FDCd853EE2b98fBf171e4C6a05Ad"
 const basicAbi = basicContractInfo.abi;
 const marketAbi = marketContractInfo.abi
@@ -69,6 +69,7 @@ function App() {
 
         const receipt = await txn.wait(1)
         const tokenId = receipt.events[0].args.tokenId;
+        console.log(tokenId)
 
         console.log(`success minted! your nft tokenID is: ${tokenId}`)
 
@@ -90,19 +91,25 @@ function App() {
         const provider = new ethers.providers.Web3Provider(ethereum);
         console.log(currentAccount)
         const signer = provider.getSigner();
-        
+
         const marketContract = new ethers.Contract(marketContractAddress,marketAbi,signer)
         const basicContract = new ethers.Contract(basicContractAddress,basicAbi,signer)
         
-        const tokenId = "0x09"
+        const tokenId = "0x0d"
         const price = ethers.utils.parseEther("0.001")
 
-        const approvalTxn = await basicContract.connect(currentAccount).approve(marketContract.address, tokenId)
+        // approvalTxn here is important
+        // we ask users to give approval on marketplace to take control of this token id
+        // the approve function can be found here: https://eips.ethereum.org/EIPS/eip-721
+        const approvalTxn = await basicContract.connect(signer).approve(marketContract.address, tokenId)
         await approvalTxn.wait(1)
+
+        const getApproved = basicContract.getApproved(tokenId)
+        console.log(getApproved)
 
         console.log("listing your nft...")
 
-        const tx = await marketContract.connect(currentAccount).listItem(basicContractAddress,tokenId,price)
+        const tx = await marketContract.connect(signer).listItem(basicContractAddress,tokenId,price)
         await tx.wait(1)
         console.log("NFT Listed with token ID: ", tokenId.toString())
 

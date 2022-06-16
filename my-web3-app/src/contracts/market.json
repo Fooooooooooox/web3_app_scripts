@@ -101,8 +101,7 @@
             }
         ],
         "name": "ItemBought",
-        "type": "event",
-        "signature": "0x263223b1dd81e51054a4e6f791d45a4a1ddb4aadcd93a2dfd892615c3fdac187"
+        "type": "event"
     },
     {
         "anonymous": false,
@@ -127,8 +126,7 @@
             }
         ],
         "name": "ItemCanceled",
-        "type": "event",
-        "signature": "0x9ba1a3cb55ce8d63d072a886f94d2a744f50cddf82128e897d0661f5ec623158"
+        "type": "event"
     },
     {
         "anonymous": false,
@@ -159,8 +157,7 @@
             }
         ],
         "name": "ItemListed",
-        "type": "event",
-        "signature": "0xd547e933094f12a9159076970143ebe73234e64480317844b0dcb36117116de4"
+        "type": "event"
     },
     {
         "inputs": [
@@ -178,9 +175,7 @@
         "name": "buyItem",
         "outputs": [],
         "stateMutability": "payable",
-        "type": "function",
-        "payable": true,
-        "signature": "0x9f37092a"
+        "type": "function"
     },
     {
         "inputs": [
@@ -198,8 +193,7 @@
         "name": "cancelListing",
         "outputs": [],
         "stateMutability": "nonpayable",
-        "type": "function",
-        "signature": "0xb2ddee06"
+        "type": "function"
     },
     {
         "inputs": [
@@ -235,9 +229,7 @@
             }
         ],
         "stateMutability": "view",
-        "type": "function",
-        "constant": true,
-        "signature": "0x88700d1c"
+        "type": "function"
     },
     {
         "inputs": [
@@ -256,9 +248,7 @@
             }
         ],
         "stateMutability": "view",
-        "type": "function",
-        "constant": true,
-        "signature": "0x30cfeda9"
+        "type": "function"
     },
     {
         "inputs": [
@@ -281,8 +271,7 @@
         "name": "listItem",
         "outputs": [],
         "stateMutability": "nonpayable",
-        "type": "function",
-        "signature": "0x89bfd38f"
+        "type": "function"
     },
     {
         "inputs": [
@@ -305,15 +294,13 @@
         "name": "updateListing",
         "outputs": [],
         "stateMutability": "nonpayable",
-        "type": "function",
-        "signature": "0xf772adf1"
+        "type": "function"
     },
     {
         "inputs": [],
         "name": "withdrawProceeds",
         "outputs": [],
         "stateMutability": "nonpayable",
-        "type": "function",
-        "signature": "0x9038e693"
+        "type": "function"
     }
 ]}

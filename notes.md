@@ -30,6 +30,8 @@ use higher version of web3
 
 ## references
 
+https://blog.chain.link/how-to-build-an-nft-marketplace-with-hardhat-and-solidity/
+
 https://dev.to/yakult/how-to-use-web3-react-to-develop-dapp-1cgn
 
 https://betterprogramming.pub/how-to-use-web3-js-to-interact-with-the-ethereum-virtual-machine-in-remix-f4923b18e707
