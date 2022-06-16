@@ -163,6 +163,40 @@ function App() {
       console.log(err)
     }
   }
+
+
+  const buyNFTHandler = async () => {
+    try {
+      const { ethereum } = window;
+
+      if (ethereum) {
+        const provider = new ethers.providers.Web3Provider(ethereum);
+        console.log(currentAccount)
+        const signer = provider.getSigner();
+
+        const marketContract = new ethers.Contract(marketContractAddress,marketAbi,signer)
+        const basicContract = new ethers.Contract(basicContractAddress,basicAbi,signer)
+
+        console.log("buying your nft...")
+
+        const listing = await marketContract.getListing(basicContractAddress, tokenId)
+        const price = listing.price.toString()
+        const tx = await marketContract.connect(signer).buyItem(basicContractAddress, tokenId, {
+            value: price,
+        })
+        await tx.wait(1)
+        console.log("NFT Bought!")
+        const newOwner = await basicContract.ownerOf(tokenId)
+        console.log(`New owner of Token ID ${tokenId} is ${newOwner}`) 
+
+      } else {
+        console.log("ethereum object does not exist...")
+      }
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
   const connectWalletButton = () => {
     return (
       <button onClick={connectWalletHandler} className='cta-button connect-wallet-button'>
@@ -194,6 +228,14 @@ function App() {
       </button>
     )
   }
+
+  const buyNFTButton = () => {
+    return (
+      <button onClick={buyNFTHandler} className='cta-button buy-NFT-button'>
+        buy NFT
+      </button>
+    )
+  }
   
   useEffect(() => {
     checkWalletIsConnected();
@@ -219,6 +261,10 @@ function App() {
       <h1></h1>
       <div>
         {cancelNFTButton()}
+      </div>
+      <h1></h1>
+      <div>
+        {buyNFTButton()}
       </div>
     </div>
   )
