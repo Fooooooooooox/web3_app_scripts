@@ -8,7 +8,15 @@ npm i web3 json-stringify-safe react-json-pretty
 # run
 npm run dev
 
-# examples
+# moralis
+
+I put a listen on my nft market place contract:
+
+https://rtfdn635smk1.usemoralis.com:2083/apps/moralisDashboard/browser/itemListed
+
+where all the listed items will be recorded as an archive with real-time updates.
+
+# web3 usages:
 
 ## 1. send transactions 
 

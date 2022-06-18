@@ -207,12 +207,14 @@ function App() {
         const signer = provider.getSigner();
 
         const marketContract = new ethers.Contract(marketContractAddress,marketAbi,signer)
+        const basicContract = new ethers.Contract(basicContractAddress,basicAbi,signer)
         console.log("searching...")
 
         const listing = await marketContract.getListing(basicContractAddress, tokenId)
+        const owner = await basicContract.ownerOf(tokenId)
         const price = listing.price.toString()
         if (listing) {
-          console.log("congrats! this nft is on sale!")
+          console.log(`congrats! this nft is on sale! price: ${price} owner: ${owner}`)
           console.log("details: " ,listing)
         } else {
           console.log("sorry this nft is not for sale...")
@@ -298,9 +300,9 @@ function App() {
         {cancelNFTButton()}
       </div>
       <h1></h1>
-      <d1>
+      <div>
         {marketListingButton()}
-      </d1>
+      </div>
       <h1></h1>
       <div>
         {buyNFTButton()}
