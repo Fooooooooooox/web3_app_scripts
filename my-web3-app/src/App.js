@@ -148,7 +148,7 @@ function App() {
         console.log(currentAccount)
         const signer = provider.getSigner();
 
-        const marketContract = await ethers.Contract(marketContractAddress,marketAbi,signer)
+        const marketContract = new ethers.Contract(marketContractAddress,marketAbi,signer)
 
         console.log("cancling your nft...")
 
@@ -197,6 +197,33 @@ function App() {
     }
   }
 
+  const showNFTHandler = async () => {
+    try {
+      const { ethereum } = window;
+
+      if (ethereum) {
+        const provider = new ethers.providers.Web3Provider(ethereum);
+        console.log(currentAccount)
+        const signer = provider.getSigner();
+
+        const marketContract = new ethers.Contract(marketContractAddress,marketAbi,signer)
+        console.log("searching...")
+
+        const listing = await marketContract.getListing(basicContractAddress, tokenId)
+        const price = listing.price.toString()
+        if (listing) {
+          console.log("congrats! this nft is on sale!")
+          console.log("details: " ,listing)
+        } else {
+          console.log("sorry this nft is not for sale...")
+        }
+      } else {
+        console.log("ethereum object does not exist...")
+      }
+    } catch (err) {
+      console.log(err)
+    }
+  }
   const connectWalletButton = () => {
     return (
       <button onClick={connectWalletHandler} className='cta-button connect-wallet-button'>
@@ -231,8 +258,16 @@ function App() {
 
   const buyNFTButton = () => {
     return (
-      <button onClick={buyNFTHandler} className='cta-button buy-NFT-button'>
+      <button onClick={buyNFTHandler} className='cta-button buy-nft-button'>
         buy NFT
+      </button>
+    )
+  }
+
+  const marketListingButton = () => {
+    return (
+      <button onClick={showNFTHandler} className='cta-button market-listing-button'>
+        show NFT listings on marketplace
       </button>
     )
   }
@@ -250,7 +285,7 @@ function App() {
       </div>
       <h1>nft market place</h1>
       <div>
-        <Input onPressEnter={ (value) => inputAddress(value) } type={ Number } />
+        <Input onPressEnter={ (value) => inputAddress(value) } type ={ Number } />
         <Input onPressEnter={ (value) => inputTokenId(value) } type ={ Number }/>
         <Input onPressEnter={ (value) => inputPrice(value) } type ={ Number }/>
       </div>
@@ -262,6 +297,10 @@ function App() {
       <div>
         {cancelNFTButton()}
       </div>
+      <h1></h1>
+      <d1>
+        {marketListingButton()}
+      </d1>
       <h1></h1>
       <div>
         {buyNFTButton()}

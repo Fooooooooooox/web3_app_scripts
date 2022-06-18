@@ -18,5 +18,17 @@
 }
 
 .mint-nft-button {
+  background: rgb(32, 129, 226);
+}
+
+.list-nft-button {
+  background: orange;
+}
+
+.cancel-nft-button {
+  background: orange;
+}
+
+.buy-nft-button {
   background: orange;
 }
