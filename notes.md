@@ -36,6 +36,22 @@ https://ethereum.stackexchange.com/questions/22983/web3-eth-contract-is-not-a-fu
 
 use higher version of web3
 
+## 2. how to get abi of a contract only knowing its address?
+
+Bytecode of a contract will be stored as "codehash" in the account storage on chain, but abi is not.
+
+How can we get the abi of a contract only knowing its address which is needed to create a instance to interact with the contract?
+
+In ethereum, etherscan get this for us. Contract deployers can upload the source code and abi of the contract to get their contracts verified, and we can get them using etherscan api.
+
+Here is the doc:
+https://docs.etherscan.io/
+
+But here is the question:
+
+How can we get contract abi in crossbell??
+
+
 ## references
 
 https://blog.chain.link/how-to-build-an-nft-marketplace-with-hardhat-and-solidity/
