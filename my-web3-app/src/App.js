@@ -7,15 +7,12 @@ import { get } from 'axios'
 import './App.css';
 import marketContractInfo from "./contracts/market.json"
 
-// import connectWalletHandler from './components/todo';
-
 const marketContractAddress = "0x427A1B98971941F7AeC2405f02bF1F819A8e3F82";
-// const basicContractAddress = "0x9bb57b37d3e3FDCd853EE2b98fBf171e4C6a05Ad"
-
 const marketAbi = marketContractInfo.abi
 
 function App() {
   const [currentAccount, setCurrentAccount] = useState(null);
+  const [signer, setSigner] = useState(null)
   const [address, setAddress] = useState(null);
   const [tokenId, setTokenId] = useState(null);
   const [price, setPrice] = useState(null);
@@ -33,6 +30,7 @@ function App() {
     setPrice(value.target.value);
     console.log(price);
   }
+
   const checkWalletIsConnected = async () => {
     const { ethereum } = window;
     if (!ethereum) {
@@ -51,6 +49,10 @@ function App() {
     } else {
       console.log("no authorized account found")
     }
+
+    const provider = new ethers.providers.Web3Provider(ethereum);
+    const signer = provider.getSigner();
+    setSigner(signer)
    }
 
   const connectWalletHandler = async () => {
@@ -58,7 +60,7 @@ function App() {
 
     if (!ethereum) {
       alert("please install metamask");
-    }
+    } 
     
     try {
       const accounts = await ethereum.request({ method: 'eth_requestAccounts'});
@@ -70,126 +72,84 @@ function App() {
    }
 
   const mintNftHandler = async () => {
-    try {
-      const { ethereum } = window;
+    if (currentAccount) {
+      let res = await get(url)
+      console.log(res)
+      const basicAbi = JSON.parse(res.data.result)
+      const contract = new ethers.Contract(address, basicAbi, signer);
+      console.log("initialize your payment...")
 
-      if (ethereum) {
-        let res = await get(url)
-        console.log(res)
-        const basicAbi = JSON.parse(res.data.result)
-        console.log(basicAbi)
-        const provider = new ethers.providers.Web3Provider(ethereum);
-        const signer = provider.getSigner();
-        const contract = new ethers.Contract(address, basicAbi, signer);
-        console.log("initialize your payment...")
+      let txn = await contract.mintNft();
 
-        let txn = await contract.mintNft();
+      // console.log(`your nft's token id is ${tokenId}`)
+      console.log("minting the NFT, please wait...");
 
-        // console.log(`your nft's token id is ${tokenId}`)
-        console.log("minting the NFT, please wait...");
+      // await txn.wait(1);
 
-        // await txn.wait(1);
+      const receipt = await txn.wait(1)
+      const tokenId = receipt.events[0].args.tokenId;
+      console.log(tokenId)
 
-        const receipt = await txn.wait(1)
-        const tokenId = receipt.events[0].args.tokenId;
-        console.log(tokenId)
+      console.log(`success minted! your nft tokenID is: ${tokenId}`)
 
-        console.log(`success minted! your nft tokenID is: ${tokenId}`)
-
-        console.log(`you can view the transaction on etherscan:https://rinkeby.etherscan.io/tx/${txn.hash}`);
-        
-      } else {
-        console.log("ethereum object doesn't exist");
-      }
-    } catch (err) {
-      console.log(err);
-    }
-   }
-  
-  const listNftHandler = async () => {
-    try {
-      const { ethereum } = window;
-
-      if (ethereum) {
-        let resAbi = await get(url)
-        const basicAbi = JSON.parse(resAbi.data.result)
-        console.log(basicAbi)
-        const provider = new ethers.providers.Web3Provider(ethereum);
-        console.log(currentAccount)
-        const signer = provider.getSigner();
-
-        const marketContract = new ethers.Contract(marketContractAddress,marketAbi,signer)
-        const basicContract = new ethers.Contract(address,basicAbi,signer)
-        
-        // const tokenId = "0x0d"
-        // const price = ethers.utils.parseWei("0.001")
-
-        // approvalTxn here is important
-        // we ask users to give approval on marketplace to take control of this token id
-        // the approve function can be found here: https://eips.ethereum.org/EIPS/eip-721
-        const approvalTxn = await basicContract.connect(signer).approve(marketContract.address, tokenId)
-        await approvalTxn.wait(1)
-
-        const getApproved = basicContract.getApproved(tokenId)
-        console.log(getApproved)
-
-        console.log("listing your nft...")
-
-        const tx = await marketContract.connect(signer).listItem(address,tokenId,price)
-        await tx.wait(1)
-        console.log("NFT Listed with token ID: ", tokenId.toString())
-
-        const mintedBy = await basicContract.ownerOf(tokenId)
-        console.log(`NFT with ID ${tokenId} minted and listed by owner ${mintedBy}}.`)
-      } else {
-        console.log("ethereum object does not exist...")
-      }
-    } catch (err) {
-      console.log(err)
+      console.log(`you can view the transaction on etherscan:https://rinkeby.etherscan.io/tx/${txn.hash}`);
+      
+    } else {
+      console.log("ethereum object doesn't exist");
     }
   }
+  
+  const listNftHandler = async () => {
+    if (currentAccount) {
+      let resAbi = await get(url)
+      const basicAbi = JSON.parse(resAbi.data.result)
+      console.log(basicAbi)
+      const marketContract = new ethers.Contract(marketContractAddress,marketAbi,signer)
+      const basicContract = new ethers.Contract(address,basicAbi,signer)
+      
+      // const tokenId = "0x0d"
+      // const price = ethers.utils.parseWei("0.001")
+
+      // approvalTxn here is important
+      // we ask users to give approval on marketplace to take control of this token id
+      // the approve function can be found here: https://eips.ethereum.org/EIPS/eip-721
+      const approvalTxn = await basicContract.connect(signer).approve(marketContract.address, tokenId)
+      await approvalTxn.wait(1)
+
+      const getApproved = basicContract.getApproved(tokenId)
+      console.log(getApproved)
+
+      console.log("listing your nft...")
+
+      const tx = await marketContract.connect(signer).listItem(address,tokenId,price)
+      await tx.wait(1)
+      console.log("NFT Listed with token ID: ", tokenId.toString())
+
+      const mintedBy = await basicContract.ownerOf(tokenId)
+      console.log(`NFT with ID ${tokenId} minted and listed by owner ${mintedBy}}.`)
+    }
+    }
 
   const cancelNftHandler = async () => {
-    try {
-      const { ethereum } = window;
+    if (currentAccount) {
+      const marketContract = new ethers.Contract(marketContractAddress,marketAbi,signer)
+      console.log("cancling your nft...")
 
-      if (ethereum) {
-        let resAbi = await get(url)
-        const basicAbi = JSON.parse(resAbi.data.result)
-        console.log(basicAbi)
-        const provider = new ethers.providers.Web3Provider(ethereum);
-        console.log(currentAccount)
-        const signer = provider.getSigner();
+      const tx = await marketContract.cancelListing(address, tokenId)
+      await tx.wait(1)
+      console.log("this nft listing is canceld  ", tokenId.toString())
 
-        const marketContract = new ethers.Contract(marketContractAddress,marketAbi,signer)
-
-        console.log("cancling your nft...")
-
-        const tx = await marketContract.cancelListing(address, tokenId)
-        await tx.wait(1)
-        console.log("this nft listing is canceld  ", tokenId.toString())
-
-      } else {
-        console.log("ethereum object does not exist...")
-      }
-    } catch (err) {
-      console.log(err)
+    } else {
+      console.log("ethereum object does not exist...")
     }
   }
 
 
   const buyNFTHandler = async () => {
-    try {
-      const { ethereum } = window;
-
-      if (ethereum) {
+      if (currentAccount) {
         let resAbi = await get(url)
         const basicAbi = JSON.parse(resAbi.data.result)
         console.log(basicAbi)
-        const provider = new ethers.providers.Web3Provider(ethereum);
-        console.log(currentAccount)
-        const signer = provider.getSigner();
-
         const marketContract = new ethers.Contract(marketContractAddress,marketAbi,signer)
         const basicContract = new ethers.Contract(address,basicAbi,signer)
 
@@ -208,41 +168,28 @@ function App() {
       } else {
         console.log("ethereum object does not exist...")
       }
-    } catch (err) {
-      console.log(err)
-    }
   }
 
   const showNFTHandler = async () => {
-    try {
-      const { ethereum } = window;
+    if (currentAccount) {
+      let resAbi = await get(url)
+      const basicAbi = JSON.parse(resAbi.data.result)
+      console.log(basicAbi)
+      const marketContract = new ethers.Contract(marketContractAddress,marketAbi,signer)
+      const basicContract = new ethers.Contract(address,basicAbi,signer)
+      console.log("searching...")
 
-      if (ethereum) {
-        let resAbi = await get(url)
-        const basicAbi = JSON.parse(resAbi.data.result)
-        console.log(basicAbi)
-        const provider = new ethers.providers.Web3Provider(ethereum);
-        console.log(currentAccount)
-        const signer = provider.getSigner();
-
-        const marketContract = new ethers.Contract(marketContractAddress,marketAbi,signer)
-        const basicContract = new ethers.Contract(address,basicAbi,signer)
-        console.log("searching...")
-
-        const listing = await marketContract.getListing(address, tokenId)
-        const owner = await basicContract.ownerOf(tokenId)
-        const price = listing.price.toString()
-        if (listing) {
-          console.log(`congrats! this nft is on sale! price: ${price} owner: ${owner}`)
-          console.log("details: " ,listing)
-        } else {
-          console.log("sorry this nft is not for sale...")
-        }
+      const listing = await marketContract.getListing(address, tokenId)
+      const owner = await basicContract.ownerOf(tokenId)
+      const price = listing.price.toString()
+      if (listing) {
+        console.log(`congrats! this nft is on sale! price: ${price} owner: ${owner}`)
+        console.log("details: " ,listing)
       } else {
-        console.log("ethereum object does not exist...")
+        console.log("sorry this nft is not for sale...")
       }
-    } catch (err) {
-      console.log(err)
+    } else {
+      console.log("ethereum object does not exist...")
     }
   }
   const connectWalletButton = () => {
